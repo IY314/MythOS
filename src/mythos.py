@@ -192,7 +192,7 @@ def login(account_idx, data, term, filename, incorrect=False):
         if not key.is_sequence:
             user_input += key
         elif key.code == term.KEY_ESCAPE:
-            return -1
+            return -2
 
     password_attempt = hashlib.sha256(user_input.encode('utf-8')).hexdigest()
     if password_attempt == password:
@@ -268,14 +268,17 @@ def boot(filename='mythos/account_data.json'):
     with term.cbreak(), term.fullscreen():
         account_idx = None
         while True:
-            if (account_idx := data.get('current')) == -1:
+            if data.get('current') != -1 and account_idx != -1:
+                account_idx = data['current']
+            else:
                 account_idx = select_account(data, term, account_idx)
             if account_idx == -1:
                 status = create_new_account(data, term, filename)
             else:
                 status = login(account_idx, data, term, filename)
-                if status == -1:
+                if status == -2:
                     account_idx = -1
+                    continue
 
             if status == -1:
                 continue
