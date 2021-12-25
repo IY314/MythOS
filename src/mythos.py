@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from enum import IntEnum, Enum, auto
-from typing import Callable, Optional, Sequence, Text, Union
 import importlib
 import time
+import json
+from blessed import Terminal
 
 
 PATHS = [
@@ -17,7 +18,7 @@ class MythOSFileAccessMode(IntEnum):
     DELETE = 0b0100
 
 
-def get_permissions_integer(*permissions: str) -> int:
+def get_permissions_integer(*permissions):
     """Return the permissions integer from the permissions listed.
 
     Raises:
@@ -26,7 +27,7 @@ def get_permissions_integer(*permissions: str) -> int:
     Returns:
         int: The bitwise OR of all permissions listed
     """
-    
+
     value = int(MythOSFileAccessMode.PRIVATE)
     for perm in permissions:
         if status := getattr(MythOSFileAccessMode, perm) is None:
@@ -54,9 +55,7 @@ class MythOSPermission:
     DEFAULT_ADMIN_PERM = 'READ', 'WRITE', 'DELETE'
     DEFAULT_OWNER_PERM = 'READ', 'WRITE', 'DELETE'
 
-    def __init__(self, *, user: Optional[Sequence[str]] = None,
-                 admin: Optional[Sequence[str]] = None,
-                 owner: Optional[Sequence[str]] = None) -> None:
+    def __init__(self, *, user=None, admin=None, owner=None):
         if user is None:
             user = self.DEFAULT_USER_PERM
         if admin is None:
@@ -69,8 +68,8 @@ class MythOSPermission:
 
         assert self.owner > self.admin > self.user, \
             'Invalid permission hierarchy'
-    
-    def __getitem__(self, index: MythOSUserRank) -> int:
+
+    def __getitem__(self, index):
         return getattr(self, index.name.lower())
 
 
@@ -89,7 +88,7 @@ class MythOSLogLevel(Enum):
 
 
 class MythOSInstance:
-    def log(self, level: Union[MythOSLogLevel, int], details: Text) -> None:
+    def log(self, level, details):
         if isinstance(level, int):
             level = MythOSLogLevel(level + 1)
         print(f'{time.strftime("%H:%M:%S")} [{level.name}]: {details}')
@@ -101,9 +100,7 @@ class MythOSFile:
     extension: str
     permission: MythOSPermission
 
-    def open(self, user: MythOSUser,
-                   args: Sequence[str],
-                   modes: Sequence[str]) -> MythOSReturnStatus:
+    def open(self, user, args, modes):
         if get_permissions_integer(*modes) > self.permission[user.rank]:
             return MythOSReturnStatus.ACCESS_DENIED
         if self.extension == 'exe':
@@ -111,12 +108,46 @@ class MythOSFile:
                 try:
                     executable = importlib.import_module(self.name, path)
                     if (exec_func := getattr(executable, 'main')) is None \
-                    or not isinstance(
-                        exec_func, Callable[[Sequence[str]], MythOSReturnStatus]
-                    ):
-                        raise AttributeError('main function not found in'
-                                             'module')
+                            or not callable(exec_func):
+                        raise AttributeError(
+                            'main function not found in module'
+                        )
                     return exec_func(*args)
                 except ModuleNotFoundError:
                     continue
             return MythOSReturnStatus.NOT_FOUND
+
+
+def mod_input(prompt='>', *, type_=str, retry=False):
+    while True:
+        try:
+            return type_(input(prompt))
+        except ValueError:
+            if not retry:
+                return None
+
+
+def callterm(*calls, newline=False):
+    print(*calls, sep='', end='')
+    if newline:
+        print()
+
+
+def boot(filename='mythos/account_data.json'):
+    data = None
+
+    with open(filename) as f:
+        data = json.load(f)
+
+    term = Terminal()
+    with term.cbreak(), term.fullscreen():
+        while True:
+            callterm(term.home, term.clear)
+            callterm(term.center(' MythOS v1.0.0 ', fillchar=f'='), newline=True)
+            callterm(term.center('Select Account'), newline=True)
+            for a in data.get('all', []):
+                pass
+
+
+if __name__ == '__main__':
+    boot()
