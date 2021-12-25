@@ -2,3 +2,4 @@ venv
 .mypy_cache
 .vscode
 .DS_Store
+account_data.json
