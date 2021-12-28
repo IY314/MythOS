@@ -1,7 +1,11 @@
-# MythOS: Rune OS's successor
+# MythOS v1.0.0
 MythOS is the successor to Rune OS (https://github.com/IY314/Rune-OS), created
 by the same team. It focuses on an entirely new user experience that is way more
 intuitive and interactive, while keeping the text-based aspects of the system.
+
+## Credits
+All credits go to the original Rune OS team (@IY314, @mrfoogles). Myth OS, 
+however, is solely created by @IY314.
 
 ## Installation
 ### Prerequisites

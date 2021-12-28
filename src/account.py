@@ -13,7 +13,8 @@ def select_account(data, term, account_idx):
         account_idx = 0 if data.get('all') else -1
     while True:
         clearterm(term)
-        callterm(term.center('Select Account'), newline=True)
+        callterm(term.move_y(term.height // 2), term.center('Select Account'),
+                 newline=True)
         for i, a in enumerate(data['all']):
             if account_idx == i:
                 callterm(term.black_on_white, a['username'],
@@ -86,15 +87,21 @@ def get_username(data, term):
 
 def get_password(term):
     password = ''
+    result = ''
+    prompt = 'Enter a password: '
 
-    callterm('Enter a password: ', flush=True)
+    callterm(prompt, flush=True)
     while (key := term.inkey()).code != term.KEY_ENTER:
         if not key.is_sequence:
             password += key
+            result += '*'
         elif key.code == term.KEY_BACKSPACE:
             password = password[:-1]
+            result = result[:-1]
         elif key.code == term.KEY_ESCAPE:
             return -1
+        clearterm(term, 'line', term.get_location())
+        callterm(prompt, result, flush=True)
 
     print()
     return hashlib.sha256(password.encode('utf-8')).hexdigest()

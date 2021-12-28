@@ -10,7 +10,8 @@ from account import (select_account,
                      login,
                      create_new_account,
                      init)
-from utils import clearterm
+from terminal import terminal
+from utils import callterm
 
 
 PATHS = [
@@ -97,8 +98,46 @@ class MythOSLogLevel(Enum):
 
 
 class MythOSInstance:
-    def __init__(self):
-        self.dirpath = None
+    def __init__(self, term):
+        self.term = term
+        self.dirpath = ['root']
+
+    def builtin_cd(self, *args):
+        if not len(args):
+            return self.log(MythOSLogLevel.ERROR, "not a directory: ''")
+        path = args[0]
+        if len(args) > 1:
+            self.log(MythOSLogLevel.WARN,
+                     f'Arguments after {path!r} are ignored')
+
+        path_list = path.split('/')
+        for i, folder in enumerate(path_list):
+            if folder == '.':
+                continue
+            elif folder == '..' and len(self.dirpath) > 1:
+                self.dirpath.pop()
+            elif folder == 'root' and i == 0:
+                self.dirpath.clear()
+                self.dirpath.append('root')
+            elif folder in os.listdir(f"mythos/{'/'.join(self.dirpath)}"):
+                self.dirpath.append(folder)
+            else:
+                return self.log(MythOSLogLevel.ERROR,
+                                f'not a directory: {folder!r}')
+
+    def builtin_ls(self, *args):
+        if len(args) > 1:
+            self.log(MythOSLogLevel.WARN,
+                     f'Arguments after {args[0]!r} are ignored')
+
+        dirname = args[0] if len(args) else self.dirpath
+        if os.path.isdir('/'.join(dirname)):
+            for d in os.listdir(dirname):
+                if os.path.isdir(os.path.join(dirname, d)):
+                    callterm(self.term.turquoise1, d,
+                             self.term.normal, newline=True)
+                else:
+                    print(d)
 
     def log(self, level, details):
         if isinstance(level, int):
@@ -155,7 +194,7 @@ def boot(filename='mythos/account_data.json'):
 
             break
 
-            terminal()
+        terminal(term, MythOSInstance(term))
 
 
 if __name__ == '__main__':
