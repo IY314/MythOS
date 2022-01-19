@@ -31,7 +31,8 @@ def select_account(data, term, account_idx):
             account_idx += 1
             if account_idx == len(data['all']):
                 account_idx = -1
-        elif key.code == term.KEY_UP and (account_idx > 0 or account_idx == -1):
+        elif key.code == term.KEY_UP \
+                and (account_idx > 0 or account_idx == -1):
             account_idx -= 1
             if account_idx < 0:
                 account_idx = len(data['all']) - 1
