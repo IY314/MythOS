@@ -13,7 +13,7 @@ def select_account(data, term, account_idx):
         account_idx = 0 if data.get('all') else -1
     while True:
         clearterm(term)
-        callterm(term.move_y(term.height // 2), term.center('Select Account'),
+        callterm(term.move_y(term.height // 4), term.center('Select Account'),
                  newline=True)
         for i, a in enumerate(data['all']):
             if account_idx == i:

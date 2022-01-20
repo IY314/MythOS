@@ -97,18 +97,32 @@ class MythOSLogLevel(Enum):
     FATAL = auto()
 
 
+def argc_check(*, lower=0, upper=1):
+    def decorator(func):
+        def wrapper(self, *args):
+            if len(args) < lower:
+                self.log(MythOSLogLevel.WARN,
+                         f'Too few arguments (expected at least {lower})')
+            elif len(args) > upper:
+                self.log(
+                    MythOSLogLevel.WARN,
+                    f'Arguments after {args[upper - 1]!r} will be ignored'
+                )
+            return func(self, *args)
+        return wrapper
+    return decorator
+
+
 class MythOSInstance:
     def __init__(self, term):
         self.term = term
         self.dirpath = ['root']
 
+    @argc_check()
     def builtin_cd(self, *args):
         if not len(args):
             return self.log(MythOSLogLevel.ERROR, "not a directory: ''")
         path = args[0]
-        if len(args) > 1:
-            self.log(MythOSLogLevel.WARN,
-                     f'Arguments after {path!r} are ignored')
 
         path_list = path.split('/')
         for i, folder in enumerate(path_list):
@@ -125,19 +139,26 @@ class MythOSInstance:
                 return self.log(MythOSLogLevel.ERROR,
                                 f'not a directory: {folder!r}')
 
+    @argc_check()
     def builtin_ls(self, *args):
-        if len(args) > 1:
-            self.log(MythOSLogLevel.WARN,
-                     f'Arguments after {args[0]!r} are ignored')
+        current_dir = self.dirpath[1:] if len(self.dirpath) - 1 else []
 
-        dirname = args[0] if len(args) else self.dirpath
-        if os.path.isdir('/'.join(dirname)):
+        dirname = 'mythos/root/' + \
+            (args[0] if len(args) else '/'.join(current_dir))
+        if os.path.isdir(dirname):
             for d in os.listdir(dirname):
                 if os.path.isdir(os.path.join(dirname, d)):
                     callterm(self.term.turquoise1, d,
                              self.term.normal, newline=True)
                 else:
                     print(d)
+        else:
+            return self.log(MythOSLogLevel.ERROR,
+                            f'not a directory: {dirname}')
+
+    @argc_check(upper=0)
+    def builtin_exit(self, *_):
+        exit(0)
 
     def log(self, level, details):
         if isinstance(level, int):

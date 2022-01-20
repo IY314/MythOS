@@ -26,6 +26,7 @@ def terminal(term, instance):
             clearterm(term, 'line', term.get_location())
             callterm(prompt, result, flush=True)
         if (parsed_args := parse_args(result)) is None:
+            print()
             continue
 
         filename, args = parsed_args
