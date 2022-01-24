@@ -2,6 +2,5 @@ venv
 .mypy_cache
 .vscode
 .DS_Store
-mythos
 .idea
 __pycache__

@@ -1,6 +1,10 @@
 import json
 
 
+class ExecExit(Exception):
+    pass
+
+
 def mod_input(prompt='>', *, type_=str, retry=False):
     while True:
         try:

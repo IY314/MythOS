@@ -1,10 +1,11 @@
+import path
 from utils import clearterm, callterm
 
 
 def parse_args(text):
     pre_args = text.split()
     if not pre_args:
-        return
+        return None
     filename = pre_args[0]
     if len(pre_args) == 1:
         return filename, []
@@ -34,5 +35,9 @@ def terminal(term, instance):
 
         if exe := getattr(instance, f'builtin_{filename}', False):
             exe(*args)
+        elif (file := path.find(filename, instance.paths)) is not None:
+            instance.run_file(file, *args)
+        else:
+            instance.log(3, f'Unknown command: {filename}')
 
         print()

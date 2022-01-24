@@ -1,18 +1,18 @@
+import importlib
+import json
+import os
+import time
 from dataclasses import dataclass
 from enum import IntEnum, Enum, auto
-import importlib
-import time
-import json
+
 from blessed import Terminal
-import os
 
 from account import (select_account,
                      login,
                      create_new_account,
                      init)
 from terminal import terminal
-from utils import callterm
-
+from utils import callterm, ExecExit
 
 PATHS = [
     'mythos.root.exe',
@@ -117,6 +117,7 @@ class MythOSInstance:
     def __init__(self, term):
         self.term = term
         self.dirpath = ['root']
+        self.paths = [['exe']]
 
     @argc_check()
     def builtin_cd(self, *args):
@@ -159,6 +160,14 @@ class MythOSInstance:
     @argc_check(upper=0)
     def builtin_exit(self, *_):
         exit(0)
+
+    def run_file(self, path, *args):
+        if path.endswith('.py'):
+            module = importlib.import_module(path[-1], 'mythos.' + ('.'.join(path[:-1])))
+            try:
+                module.run(*args)
+            except ExecExit:
+                pass
 
     def log(self, level, details):
         if isinstance(level, int):
