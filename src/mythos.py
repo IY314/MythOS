@@ -13,6 +13,10 @@ from account import (select_account,
                      init)
 from terminal import terminal
 from utils import callterm, ExecExit
+<<<<<<< HEAD
+=======
+
+>>>>>>> b93d5d57ea0b64b9deb87f050b8bfc07885fa4d8
 
 PATHS = [
     'mythos.root.exe',
