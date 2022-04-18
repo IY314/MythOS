@@ -6,4 +6,5 @@ def run(*args):
         raise ExecExit
     elif len(args) == 1:
         print(args[0])
-    print(args[0] % args[1:])
+    else:
+        print(args[0] % args[1:])

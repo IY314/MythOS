@@ -4,6 +4,7 @@ import os
 import time
 from dataclasses import dataclass
 from enum import IntEnum, Enum, auto
+import sys
 
 from blessed import Terminal
 
@@ -13,6 +14,10 @@ from account import (select_account,
                      init)
 from terminal import terminal
 from utils import callterm, ExecExit
+
+
+sys.path.append('.')
+
 
 PATHS = [
     'mythos.root.exe',
@@ -162,9 +167,9 @@ class MythOSInstance:
         exit(0)
 
     def run_file(self, path, *args):
-        if path.endswith('.py'):
+        if path[0]:
             module = importlib.import_module(
-                path[-1], 'mythos.' + ('.'.join(path[:-1])))
+                'mythos.' + ('.'.join(path[1:])))
             try:
                 module.run(*args)
             except ExecExit:

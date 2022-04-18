@@ -3,13 +3,12 @@ import os
 
 def _find_all(filename, paths):
     for path in paths:
-        if os.path.isfile(os.path.join('.', 'root', *path, filename)):
-            yield ['root', *path, filename]
+        if os.path.isfile(os.path.join('.', 'mythos', 'root', *path, filename + '.py')):
+            yield [True, 'root', *path, filename]
 
 
 def find(filename, paths):
-    result = tuple(_find_all(filename, paths))
-    if result:
+    if result := find_all(filename, paths):
         return result[0]
     return None
 
