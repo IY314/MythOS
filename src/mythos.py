@@ -13,10 +13,6 @@ from account import (select_account,
                      init)
 from terminal import terminal
 from utils import callterm, ExecExit
-<<<<<<< HEAD
-=======
-
->>>>>>> b93d5d57ea0b64b9deb87f050b8bfc07885fa4d8
 
 PATHS = [
     'mythos.root.exe',
@@ -167,7 +163,8 @@ class MythOSInstance:
 
     def run_file(self, path, *args):
         if path.endswith('.py'):
-            module = importlib.import_module(path[-1], 'mythos.' + ('.'.join(path[:-1])))
+            module = importlib.import_module(
+                path[-1], 'mythos.' + ('.'.join(path[:-1])))
             try:
                 module.run(*args)
             except ExecExit:
