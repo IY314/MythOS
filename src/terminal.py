@@ -1,8 +1,20 @@
+"""Shell functions."""
+
 import path
 from utils import clearterm, callterm
 
 
 def parse_args(text):
+    """
+    Parse arguments from a string.
+
+    Args:
+        text: the string to parse
+
+    Returns:
+        A tuple of the filename and the arguments, or None if the string is
+        invalid
+    """
     pre_args = text.split()
     if not pre_args:
         return None
@@ -14,10 +26,20 @@ def parse_args(text):
 
 
 def terminal(term, instance):
+    """
+    Run a MythOS shell.
+
+    Args:
+        term: the terminal instance to use
+        instance: the MythOS instance to use
+
+    Returns:
+        None
+    """
     clearterm(term)
     while True:
         prompt = f"{'/'.join(instance.dirpath)} % "
-        callterm(prompt, flush=True)
+        callterm(prompt)
         result = ''
         while (key := term.inkey()).code != term.KEY_ENTER:
             if not key.is_sequence:
@@ -25,7 +47,7 @@ def terminal(term, instance):
             elif key.code == term.KEY_BACKSPACE and result:
                 result = result[:-1]
             clearterm(term, 'line', term.get_location())
-            callterm(prompt, result, flush=True)
+            callterm(prompt)
         if (parsed_args := parse_args(result)) is None:
             print()
             continue

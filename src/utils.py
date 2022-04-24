@@ -1,26 +1,43 @@
+"""Utility functions."""
+
 import json
 
 
 class ExecExit(Exception):
+    """Exception thrown to exit a program."""
+
     pass
 
 
-def mod_input(prompt='>', *, type_=str, retry=False):
-    while True:
-        try:
-            return type_(input(prompt))
-        except ValueError:
-            if not retry:
-                return None
+def callterm(*calls, newline=False, flush=True):
+    """
+    Call a terminal code.
 
+    Args:
+        *calls: the terminal codes to call
+        newline: whether to print a newline after the calls
+        flush: whether to flush the output after the calls
 
-def callterm(*calls, newline=False, flush=False):
+    Returns:
+        None
+    """
     print(*calls, sep='', end='', flush=flush)
     if newline:
         print()
 
 
 def clearterm(term, extent='screen', location=(0, 0)):
+    """
+    Clear the terminal.
+
+    Args:
+        term: the terminal instance to use
+        extent: the extent to clear (default: 'screen')
+        location: the location to start clearing from (default: (0, 0))
+
+    Returns:
+        None
+    """
     if extent == 'screen':
         attr = term.clear
     elif extent == 'line':
@@ -33,9 +50,9 @@ def clearterm(term, extent='screen', location=(0, 0)):
         with open('mythos/mythos.json') as f:
             version_number = json.load(f)['version']
         callterm(
-            term.center(f' MythOS v{version_number} ', fillchar=f'='),
+            term.center(f' MythOS v{version_number} ', fillchar='='),
             newline=True
         )
         print()
     # Adjust column
-    callterm(term.move_x(0), flush=True)
+    callterm(term.move_x(0))
