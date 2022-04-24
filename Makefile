@@ -9,7 +9,7 @@ install:
 	@./venv/bin/pip install -r requirements.txt
 
 dev_pkgs: install
-	@python -m pip install -r requirements_dev.txt; fi
+	@python -m pip install -r requirements_dev.txt
 
 cleanup:
 	@rm -rf .mypy_cache venv
