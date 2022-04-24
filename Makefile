@@ -8,9 +8,8 @@ install:
 	@./venv/bin/pip install -U pip
 	@./venv/bin/pip install -r requirements.txt
 
-dev_pkgs:
-	@printf "\e[1;33;1mWarning: 'make install' must be run before running this command\e[m\nContinue? (y to continue) "
-	@read warn; if [ $$warn = "y" ]; then python -m pip install -r requirements_dev.txt; fi
+dev_pkgs: install
+	@python -m pip install -r requirements_dev.txt
 
 cleanup:
 	@rm -rf .mypy_cache venv
