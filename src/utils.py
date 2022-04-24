@@ -56,3 +56,51 @@ def clearterm(term, extent='screen', location=(0, 0)):
         print()
     # Adjust column
     callterm(term.move_x(0))
+
+
+def get_input(
+        term,
+        prompt,
+        *,
+        default=None,
+        hide=False,
+        condition=lambda _: None,
+        hook=None
+        ):
+    """
+    Get input from the user.
+
+    Args:
+        term: the terminal
+        prompt: the prompt to display
+        default: the default value to use if the user does not enter anything
+        hide: whether to hide the input from the user
+        condition: a function that returns a message if the input is invalid
+        hook: a function that is called after the input is valid
+
+    Returns:
+        The input, or -1 if the user wants to cancel
+    """
+    user_input = ''
+    display = ''
+    print(prompt, end='')
+    while (key := term.inkey()).code != term.KEY_ENTER:
+        if not key.is_sequence:
+            user_input += key
+            display += '*' if hide else key
+        elif key.code == term.KEY_BACKSPACE:
+            user_input = user_input[:-1]
+            display = display[:-1]
+        elif key.code == term.KEY_ESCAPE:
+            return -1
+        clearterm(term, 'line', term.get_location())
+        print(f'{prompt}{display}', end='')
+
+    if msg := condition(user_input):
+        print(f'\n{msg}')
+        return get_input(term, prompt, default, hide, condition)
+
+    print()
+    if hook:
+        return hook(user_input)
+    return user_input

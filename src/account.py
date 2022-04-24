@@ -3,6 +3,7 @@
 import json
 import hashlib
 from utils import clearterm, callterm
+import utils
 
 
 def init(filename='mythos/account_data.json'):
@@ -113,24 +114,16 @@ def get_username(data, term):
     Returns:
         The username, or -1 if the user wants to cancel
     """
-    username = ''
-    print('Enter a username: ', end='')
-    while (key := term.inkey()).code != term.KEY_ENTER:
-        if not key.is_sequence:
-            username += key
-            callterm(key)
-        elif key.code == term.KEY_BACKSPACE:
-            username = username[:-1]
-            callterm('\x08')
-        elif key.code == term.KEY_ESCAPE:
-            return -1
 
-    if username in (a['username'] for a in data['all']):
-        print('\nThat username is taken.')
-        return get_username(data, term)
+    def condition(user_input):
+        if user_input in (u['username'] for u in data['all']):
+            return 'That username already exists.'
 
-    print()
-    return username
+    return utils.get_input(
+        term,
+        'Enter a username: ',
+        condition=condition
+    )
 
 
 def get_password(term):
@@ -143,25 +136,24 @@ def get_password(term):
     Returns:
         The password, or -1 if the user wants to cancel
     """
-    password = ''
-    result = ''
-    prompt = 'Enter a password: '
 
-    callterm(prompt)
-    while (key := term.inkey()).code != term.KEY_ENTER:
-        if not key.is_sequence:
-            password += key
-            result += '*'
-        elif key.code == term.KEY_BACKSPACE:
-            password = password[:-1]
-            result = result[:-1]
-        elif key.code == term.KEY_ESCAPE:
-            return -1
-        clearterm(term, 'line', term.get_location())
-        callterm(prompt, result)
+    def condition(user_input):
+        if len(user_input) < 8:
+            return 'Password must be at least 8 characters long.'
+        elif user_input.isalnum():
+            return ('Password must contain at least '
+                    'one non-alphanumeric character.')
 
-    print()
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+    def hash_input(user_input):
+        return hashlib.sha256(user_input.encode('utf-8')).hexdigest()
+
+    return utils.get_input(
+        term,
+        'Enter a password: ',
+        hide=True,
+        condition=condition,
+        hook=hash_input
+    )
 
 
 def create_new_account(data, term, filename):
