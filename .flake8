@@ -1,0 +1,10 @@
+[flake8]
+exclude =
+    # git
+    .git,
+    # virtualenv (time hog)
+    venv,
+    # pyc files
+    __pycache__,
+    # internal directories
+    mythos/root
